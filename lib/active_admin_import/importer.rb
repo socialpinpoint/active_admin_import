@@ -54,6 +54,23 @@ module ActiveAdminImport
       @result.merge!(self.store) { |key, val1, val2| val1+val2 }
     end
 
+    def batch_replace(header_key, options)
+      index = header_index(header_key)
+      csv_lines.map! do |line|
+        from = line[index]
+        line[index] = options[from] if options.has_key?(from)
+        line
+      end
+    end
+
+    def values_at(header_key)
+      csv_lines.collect { |line| line[header_index(header_key)] }.uniq
+    end
+
+    def header_index(header_key)
+      headers.values.index(header_key)
+    end
+
     def import
       options[:before_import].call(self) if options[:before_import].is_a?(Proc)
       lines = []
